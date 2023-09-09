@@ -9,10 +9,13 @@ namespace BooksAPI.Models
     public class ContextDb
     {
          private string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
-         public SqlConnection sqlConnection = new SqlConnection("dbconn");
+        SqlConnection sqlConnection;
 
-       // public SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconn"].ConnectionString);
-
+        // public SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconn"].ConnectionString);
+        public ContextDb()
+        {
+            sqlConnection = new SqlConnection(dbconn);
+        }
 
 
         public List<AuthorModel> Get()
@@ -28,8 +31,8 @@ namespace BooksAPI.Models
             {
                 list.Add(new AuthorModel
                 {
-                    auth_id = Convert.ToInt32(dr["0"]),
-                    author_name = Convert.ToString(dr["1"])
+                    auth_id = Convert.ToInt32(dr["auth_id"]),
+                    author_name = Convert.ToString(dr["author_name"])
                 });
             }
             return list;
