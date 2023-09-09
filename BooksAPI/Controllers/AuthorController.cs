@@ -21,9 +21,9 @@ namespace BooksAPI.Controllers
 
         // GET api/<AuthorController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public IEnumerable<AuthorModel> Get(int id)   //to GET MEthod
         {
-            return "value";
+            return db.Get(id).ToList();
         }
 
         // POST api/<AuthorController>
