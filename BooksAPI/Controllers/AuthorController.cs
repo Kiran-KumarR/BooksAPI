@@ -43,8 +43,9 @@ namespace BooksAPI.Controllers
 
         // DELETE api/<AuthorController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IEnumerable<AuthorModel> Delete(int id)   //to Post MEthod
         {
+            return db.Delete(id).ToList();
         }
     }
 }

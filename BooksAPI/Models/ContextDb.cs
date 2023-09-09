@@ -132,5 +132,33 @@ namespace BooksAPI.Models
             return list;
 
         }
+        /// <summary>
+        /// Delete Method 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public List<AuthorModel> Delete(int id)
+        {
+            List<AuthorModel> list = new List<AuthorModel>();
+            SqlCommand sqlCommand = new SqlCommand("Delete from Author where auth_id=@id", sqlConnection);
+            sqlCommand.Parameters.AddWithValue("@id", id);
+            SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
+
+            DataTable dt = new DataTable();
+            adp.Fill(dt); //fill the datatable ,no need to use open and close connection by using adapater
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                list.Add(new AuthorModel
+                {
+                    auth_id = Convert.ToInt32(dr["auth_id"]),
+                    author_name = Convert.ToString(dr["author_name"])
+                });
+            }
+            return list;
+
+        }
+
+
     }
 }
