@@ -17,7 +17,12 @@ namespace BooksAPI.Models
             sqlConnection = new SqlConnection(dbconn);
         }
 
-
+        /// <summary>
+        /// GET
+        /// METHOD
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public List<AuthorModel> Get()
         {
             List<AuthorModel> list= new List<AuthorModel>();
@@ -38,7 +43,10 @@ namespace BooksAPI.Models
             return list;
 
         }
-
+        /// <summary>
+        /// POST METHOD 
+        /// </summary>
+        /// <returns></returns>
         public List<AuthorModel> Post() {
 
             List<AuthorModel> list = new List<AuthorModel>();
@@ -63,12 +71,51 @@ namespace BooksAPI.Models
 
         }
 
+        /// <summary>
+        /// GET METHOD BY ID
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+
         public List<AuthorModel> Get(int id)
         {
             List<AuthorModel> list = new List<AuthorModel>();
             SqlCommand sqlCommand = new SqlCommand("select * from Author where auth_id=@id", sqlConnection);//SELECT * FROM Author WHERE auth_id = @id
             sqlCommand.Parameters.AddWithValue("@id", id);
-            
+
+            SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
+
+            DataTable dt = new DataTable();
+            adp.Fill(dt); //fill the datatable ,no need to use open and close connection by using adapater
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                list.Add(new AuthorModel
+                {
+                    auth_id = Convert.ToInt32(dr["auth_id"]),
+                    author_name = Convert.ToString(dr["author_name"])
+                });
+            }
+            return list;
+
+        }
+
+        /// <summary>
+        /// PUT METHOD BY ID
+        /// to replace an existing resource entirely, you can use PUT
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+
+        public List<AuthorModel> Put(int id, string name)
+        {
+            List<AuthorModel> list = new List<AuthorModel>();
+            SqlCommand sqlCommand = new SqlCommand("UPDATE Author SET author_name = @name WHERE auth_id = @id", sqlConnection);//SELECT * FROM Author WHERE auth_id = @id
+            sqlCommand.Parameters.AddWithValue("@name", name);
+            sqlCommand.Parameters.AddWithValue("@id", id);
+
             SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
 
             DataTable dt = new DataTable();

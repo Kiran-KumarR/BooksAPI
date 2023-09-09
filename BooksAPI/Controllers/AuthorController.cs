@@ -35,9 +35,11 @@ namespace BooksAPI.Controllers
 
         // PUT api/<AuthorController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public IEnumerable<AuthorModel> Put(int id,string name)   //to Post MEthod
         {
+            return db.Put(id,name).ToList();
         }
+
 
         // DELETE api/<AuthorController>/5
         [HttpDelete("{id}")]
