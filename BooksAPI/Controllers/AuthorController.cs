@@ -28,8 +28,9 @@ namespace BooksAPI.Controllers
 
         // POST api/<AuthorController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IEnumerable<AuthorModel> Post()   //to Post MEthod
         {
+            return db.Post().ToList();
         }
 
         // PUT api/<AuthorController>/5

@@ -38,5 +38,29 @@ namespace BooksAPI.Models
             return list;
 
         }
+
+        public List<AuthorModel> Post() {
+
+            List<AuthorModel> list = new List<AuthorModel>();
+            SqlCommand sqlCommand = new SqlCommand("  INSERT INTO Author (author_name) VALUES ('Stephen King'),('MAXWELL'),('Steve Smith'); ", sqlConnection);
+            SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
+
+            DataTable dt = new DataTable();
+            adp.Fill(dt);
+
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                list.Add(new AuthorModel
+                {
+                    auth_id = Convert.ToInt32(dr["auth_id"]),
+                    author_name = Convert.ToString(dr["author_name"])
+                });
+            }
+            return list;
+
+
+
+        }
     }
 }
