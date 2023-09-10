@@ -8,17 +8,9 @@
 
   <ItemGroup>
     <Compile Remove="NewFolder3\**" />
-    <Compile Remove="NewFolder4\**" />
-    <Compile Remove="NewFolder5\**" />
     <Content Remove="NewFolder3\**" />
-    <Content Remove="NewFolder4\**" />
-    <Content Remove="NewFolder5\**" />
     <EmbeddedResource Remove="NewFolder3\**" />
-    <EmbeddedResource Remove="NewFolder4\**" />
-    <EmbeddedResource Remove="NewFolder5\**" />
     <None Remove="NewFolder3\**" />
-    <None Remove="NewFolder4\**" />
-    <None Remove="NewFolder5\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +27,10 @@
 
   <ItemGroup>
     <None Include="C:\Users\KKumarR\Desktop\BooksAPI\BooksAPI\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
   </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using BooksAPI.Interface;
 using BooksAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddSwaggerGen();
 //builder.Services.AddDbContext<ContextDb>(options =>
 //options.UseSqlServer(builder.Configuration.GetConnectionString("dbconn")));
 
+builder.Services.AddScoped<IAuthorInterface,ContextDb >();//dependency injection added 
 
 var app = builder.Build();
 

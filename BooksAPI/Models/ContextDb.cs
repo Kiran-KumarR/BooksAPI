@@ -3,12 +3,15 @@ using System.Data;
 //using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using BooksAPI.Interface;
 
 namespace BooksAPI.Models
 {
-    public class ContextDb
+    public class ContextDb:IAuthorInterface
     {
-         private string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
+
+
+        private string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
         SqlConnection sqlConnection;
 
         // public SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconn"].ConnectionString);

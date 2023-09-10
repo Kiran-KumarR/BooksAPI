@@ -1,5 +1,7 @@
-﻿using BooksAPI.Models;
+﻿using BooksAPI.Interface;
+using BooksAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using BooksAPI.Interface;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,13 +11,19 @@ namespace BooksAPI.Controllers
     [ApiController]
     public class AuthorController : ControllerBase
     {
+        private readonly IAuthorInterface _config;
+        public AuthorController(IAuthorInterface configuration)
+        {
+            _config = configuration;
+        }
+       //ContextDb db=new ContextDb();
 
-        ContextDb db=new ContextDb();
+
         // GET: api/<AuthorController>
         [HttpGet]
         public IEnumerable<AuthorModel> Get()   //to GET MEthod
         {
-            return db.Get().ToList();
+            return _config.Get().ToList();
         }
 
 
@@ -23,21 +31,21 @@ namespace BooksAPI.Controllers
         [HttpGet("{id}")]
         public IEnumerable<AuthorModel> Get(int id)   //to GET MEthod
         {
-            return db.Get(id).ToList();
+            return _config.Get(id).ToList();
         }
 
         // POST api/<AuthorController>
         [HttpPost]
         public IEnumerable<AuthorModel> Post()   //to Post MEthod
         {
-            return db.Post().ToList();
+            return _config.Post().ToList();
         }
 
         // PUT api/<AuthorController>/5
         [HttpPut("{id}")]
         public IEnumerable<AuthorModel> Put(int id,string name)   //to Post MEthod
         {
-            return db.Put(id,name).ToList();
+            return _config.Put(id,name).ToList();
         }
 
 
@@ -45,7 +53,7 @@ namespace BooksAPI.Controllers
         [HttpDelete("{id}")]
         public IEnumerable<AuthorModel> Delete(int id)   //to Post MEthod
         {
-            return db.Delete(id).ToList();
+            return _config.Delete(id).ToList();
         }
     }
 }

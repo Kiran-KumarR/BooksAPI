@@ -1,4 +1,6 @@
-﻿namespace BooksAPI.Models
+﻿using BooksAPI.Interface;
+
+namespace BooksAPI.Models
 {
     public class AuthorModel
     {
