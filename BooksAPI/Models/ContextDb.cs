@@ -9,16 +9,18 @@ namespace BooksAPI.Models
 {
     public class ContextDb:IAuthorInterface
     {
+       
 
+         private string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
+         SqlConnection sqlConnection;
 
-        private string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
-        SqlConnection sqlConnection;
-
-        // public SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconn"].ConnectionString);
-        public ContextDb()
-        {
-            sqlConnection = new SqlConnection(dbconn);
-        }
+         // public SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconn"].ConnectionString);
+         public ContextDb()
+         {
+             sqlConnection = new SqlConnection(dbconn);
+         }
+        //string connectionString = _configuration.GetConnectionString("DefaultConnection");
+        //SqlConnection sqlConnection = new SqlConnection(connectionString);
 
         /// <summary>
         /// GET
@@ -105,13 +107,12 @@ namespace BooksAPI.Models
         }
 
         /// <summary>
-        /// PUT METHOD BY ID
+        ///  PUT METHOD BY ID
         /// to replace an existing resource entirely, you can use PUT
         /// </summary>
         /// <param name="id"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-
         public List<AuthorModel> Put(int id, string name)
         {
             List<AuthorModel> list = new List<AuthorModel>();
