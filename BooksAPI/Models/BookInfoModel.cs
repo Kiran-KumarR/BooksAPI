@@ -8,7 +8,7 @@
 
         public string title { get; set; }
 
-        public string auth_id { get; set; }
+        public int  auth_id { get; set; }
 
         public string author_name{ get; set; }
 
@@ -27,5 +27,9 @@
         public string publishedDate { get; set; }
 
         public decimal retailPrice { get; set; }
+
+        public int author_id {  get; set; }
+
+        public int publisher_id {  get; set; }
     }
 }

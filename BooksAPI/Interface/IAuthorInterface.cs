@@ -29,5 +29,15 @@ namespace BooksAPI.Interface
 
         int GetUniqueBookId(SqlConnection connection);
 
+
+        List<BookInfoModel> GetBooks(int id);
+
+        List<BookInfoModel> PostBooks();
+
+        List<BookInfoModel> PutintoBooks(int id, string title);
+
+        List<BookInfoModel> DeleteBook(int id);
+
+        Task<List<BookInfoModel>> RetrieveBooksFromJson(string jsonFilePath);
     }
 }
