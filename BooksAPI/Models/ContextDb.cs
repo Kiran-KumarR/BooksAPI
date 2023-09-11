@@ -294,7 +294,7 @@ namespace BooksAPI.Models
                 sqlConnection.Open();
 
 
-              string selectSql = " SELECT B.id , B.title,A.auth_id ,   A.author_name ,  P.pub_id  ,\r\n    P.publisher_name ,\r\n    B.description  ,\r\n    BI.language ,\r\n    BI.maturityRating ,\r\n    BI.pageCount,\r\n    BI.categories ,\r\n    BI.publishedDate,\r\n    BI.retailPrice \r\nFROM\r\n    Books B\r\nINNER JOIN\r\n    Author A ON B.author_id = A.auth_id\r\nINNER JOIN\r\n    Publisher P ON B.publisher_id = P.pub_id\r\nINNER JOIN\r\n    BookInfo BI ON B.id = BI.id;\r\n";
+              string selectSql = " SELECT B.id , B.title,A.auth_id ,   A.author_name ,  P.pub_id  ,  P.publisher_name ,   B.description  ,  B.language , B.maturityRating ,  B.pageCount,  BI.categories ,   B.publishedDate, B.retailPrice FROM    Books B INNER JOIN Author A ON B.author_id = A.auth_id INNER JOIN Publisher P ON B.publisher_id = P.pub_id ";
                  SqlCommand command = new SqlCommand(selectSql, sqlConnection);
 
                     SqlDataReader reader = command.ExecuteReader();
@@ -316,9 +316,9 @@ namespace BooksAPI.Models
                                 language = reader.GetString(7),
                                 maturityRating = reader.GetString(8),
                                 pageCount = reader.GetInt32(9),
-                                categories=reader.GetString(10),
-                                publishedDate = reader.GetString(11),
-                                retailPrice=reader.GetDecimal(12)
+                               // categories=reader.GetString(10),
+                                publishedDate = reader.GetString(10),
+                                retailPrice=reader.GetDecimal(11)
                                 
 
                             };
@@ -418,15 +418,20 @@ namespace BooksAPI.Models
 
                     int bookId = GetUniqueBookId(sqlConnection);
 
-                    string insertBookSql = "INSERT INTO Books (id, title, author_id, publisher_id, description) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000))";
+                    string insertBookSql = "INSERT INTO Books (id, title, author_id, publisher_id, description,language,maturityRating,pageCount,publishedDate,retailPrice) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000),@language,@maturityRating,@pageCount,@publishedDate,@retailPrice)";
                     SqlCommand insertBookCommand = new SqlCommand(insertBookSql, sqlConnection);
                     insertBookCommand.Parameters.AddWithValue("@BookId", bookId);
                     insertBookCommand.Parameters.AddWithValue("@Title", bookInfo.title);
                     insertBookCommand.Parameters.AddWithValue("@AuthorId", auth_id);
                     insertBookCommand.Parameters.AddWithValue("@PublisherId", pub_id);
-                    insertBookCommand.Parameters.AddWithValue("@Description", bookInfo.description); // Use Description
+                    insertBookCommand.Parameters.AddWithValue("@Description", bookInfo.description);
+                    insertBookCommand.Parameters.AddWithValue("@language", bookInfo.language);
+                    insertBookCommand.Parameters.AddWithValue("@maturityRating", bookInfo.maturityRating);
+                    insertBookCommand.Parameters.AddWithValue("@pageCount", bookInfo.pageCount);
+                    insertBookCommand.Parameters.AddWithValue("@publishedDate", bookInfo.publishedDate);
+                    insertBookCommand.Parameters.AddWithValue("@retailPrice", bookInfo.retailPrice);
 
-                    insertBookCommand.ExecuteNonQuery();
+                insertBookCommand.ExecuteNonQuery();
                 }
             
         }
