@@ -57,15 +57,16 @@ namespace BooksAPI.Controllers
 
         // GET api/<BooksInfoController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public IEnumerable<BookInfoModel> GetBooks(int id)   //to GET MEthod
         {
-            return "value";
+            return _config.GetBooks(id).ToList();
         }
 
         // POST api/<BooksInfoController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public List<BookInfoModel> PostBooks()
         {
+            return _config.PostBooks().ToList();
         }
 
         // PUT api/<BooksInfoController>/5

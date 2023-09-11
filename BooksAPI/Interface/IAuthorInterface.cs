@@ -29,5 +29,10 @@ namespace BooksAPI.Interface
 
         int GetUniqueBookId(SqlConnection connection);
 
+
+        List<BookInfoModel> GetBooks(int id);
+
+        List<BookInfoModel> PostBooks();
+
     }
 }

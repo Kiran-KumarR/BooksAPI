@@ -436,6 +436,13 @@ namespace BooksAPI.Models
             
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="author_name"></param>
+        /// <returns></returns>
        public int GetOrCreateAuthorId(SqlConnection connection, string author_name)
         {
             string selectAuthorSql = "SELECT auth_id FROM Author WHERE author_name = @AuthorName";
@@ -458,7 +465,12 @@ namespace BooksAPI.Models
                 return Convert.ToInt32(insertAuthorCommand.ExecuteScalar());
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <param name="publisher_name"></param>
+        /// <returns></returns>
         public int GetOrCreatePublisherId(SqlConnection connection, string publisher_name)
         {
             string selectPublisherSql = "SELECT pub_id FROM Publisher WHERE publisher_name = @PublisherName";
@@ -482,9 +494,15 @@ namespace BooksAPI.Models
                 return Convert.ToInt32(insertPublisherCommand.ExecuteScalar());
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connection"></param>
+        /// <returns></returns>
         public int GetUniqueBookId(SqlConnection connection)
         {
-
+            sqlConnection.Open();
             string selectMaxBookIdSql = "SELECT MAX(id) FROM Books";
             SqlCommand selectMaxBookIdCommand = new SqlCommand(selectMaxBookIdSql, connection);
             var maxId = selectMaxBookIdCommand.ExecuteScalar();
@@ -497,8 +515,76 @@ namespace BooksAPI.Models
                 return (int)maxId + 1;
             }
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public List<BookInfoModel> GetBooks(int id)
+        {
+            List<BookInfoModel> list = new List<BookInfoModel>();
+            SqlCommand sqlCommand = new SqlCommand("select * from Books where id=@id", sqlConnection);//SELECT * FROM Author WHERE auth_id = @id
+            sqlCommand.Parameters.AddWithValue("@id", id);
+
+            SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
+
+            DataTable dt = new DataTable();
+            adp.Fill(dt); //fill the datatable ,no need to use open and close connection by using adapater
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                list.Add(new BookInfoModel
+                {
+                    id = Convert.ToInt32(dr["id"]),
+                    title = Convert.ToString(dr["title"]),
+                    auth_id = Convert.ToInt32(dr["author_id"]),
+                    pub_id = Convert.ToInt32(dr["publisher_id"]),
+                    description = Convert.ToString(dr["description"]),
+                    language = Convert.ToString(dr["language"]),
+                    maturityRating = Convert.ToString(dr["maturityRating"]),
+                    publishedDate= Convert.ToString(dr["publishedDate"]),
+                    retailPrice = Convert.ToDecimal(dr["retailPrice"])
+                });
+            }
+            return list;
+
+        }
+
+        public List<BookInfoModel> PostBooks()
+        {
+
+            List<BookInfoModel> list = new List<BookInfoModel>();
+
+            int bookId = GetUniqueBookId(sqlConnection);
+
+            SqlCommand sqlCommand1 = new SqlCommand(" insert into Books(id,title,author_id,publisher_id,description,language,maturityRating,pageCount,publishedDate,retailPrice) \r\nvalues (@BookId,'HarryPotter',3000,2000,'Fiction Book into the world of harry potter','English','Mature',420,'12-09-2008',88.31); ", sqlConnection);
+            SqlCommand insertBookCommand = sqlCommand1;
+            insertBookCommand.Parameters.AddWithValue("@BookId", bookId);
+
+            SqlDataAdapter adp = new SqlDataAdapter(insertBookCommand);
+
+            DataTable dt = new DataTable();
+            adp.Fill(dt);
 
 
+            foreach (DataRow dr in dt.Rows)
+            {
+                list.Add(new BookInfoModel
+                {
+                    id = Convert.ToInt32(dr["id"]),
+                    title = Convert.ToString(dr["title"]),
+                    auth_id = Convert.ToInt32(dr["author_id"]),
+                    pub_id = Convert.ToInt32(dr["publisher_id"]),
+                    description = Convert.ToString(dr["description"]),
+                    language = Convert.ToString(dr["language"]),
+                    maturityRating = Convert.ToString(dr["maturityRating"]),
+                    publishedDate = Convert.ToString(dr["publishedDate"]),
+                    retailPrice = Convert.ToDecimal(dr["retailPrice"])
+                });
+            }
+            return list;
+
+        }
 
 
     }

@@ -8,7 +8,7 @@
 
         public string title { get; set; }
 
-        public string auth_id { get; set; }
+        public int  auth_id { get; set; }
 
         public string author_name{ get; set; }
 
