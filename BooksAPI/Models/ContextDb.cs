@@ -162,6 +162,116 @@ namespace BooksAPI.Models
             return list;
 
         }
+        /// <summary>
+        /// 
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<GetAllBooksInfo> GetAllBooksInfo()
+        {
+            List<GetAllBooksInfo> list = new List<GetAllBooksInfo>();
+            SqlCommand sqlCommand = new SqlCommand("EXEC GetAllBooksInfo", sqlConnection);
+            SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
+
+            DataTable dt = new DataTable();
+            adp.Fill(dt); //fill the datatable ,no need to use open and close connection by using adapater
+
+            foreach (DataRow dr in dt.Rows)
+            {
+                list.Add(new GetAllBooksInfo
+                {
+                    id = Convert.ToInt32(dr["id"]),
+                    title = Convert.ToString(dr["title"]),
+                    auth_name = Convert.ToString(dr["auth_name"]),
+                    publisher_name = Convert.ToString(dr["publisher_name"]),
+                    description = Convert.ToString(dr["description"]),
+                    language = Convert.ToString(dr["language"]),
+                    maturityRating = Convert.ToString(dr["maturityRating"]),
+                    pageCount = Convert.ToInt32(dr["pageCount"]),
+                    categories = Convert.ToString(dr["categories"]),
+                    publishedDate = Convert.ToString(dr["publishedDate"]),
+                    retailPrice = Convert.ToDecimal(dr["retailPrice"])
+
+
+                });
+            }
+            return list;
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+
+        public List<GetAllBooksInfo> GetAllBooksInfo(int id)
+        {
+            List<GetAllBooksInfo> list = new List<GetAllBooksInfo>();
+            SqlCommand sqlCommand = new SqlCommand("GetAllBooksInfoById", sqlConnection);
+            //Sqlcommand sqlCommand = new SqlCommand("GetFullNameById", sqlConnection);
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.AddWithValue("@id", id);
+            //connection.Open();
+            //sqlCommand.Parameters.AddWithValue("@id", id);
+            sqlConnection.Open();
+             var reader = sqlCommand.ExecuteReader();
+
+            
+               if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                list.Add(new GetAllBooksInfo
+                {
+                    id = Convert.ToInt32(reader.GetValue(0)),
+                    title = Convert.ToString(reader.GetValue(1)),
+                    auth_name = Convert.ToString(reader.GetValue(2)),
+                    publisher_name = Convert.ToString(reader.GetValue(3)),
+                    description = Convert.ToString(reader.GetValue(4)),
+                    language = Convert.ToString(reader.GetValue(5)),
+                    maturityRating = Convert.ToString(reader.GetValue(6)),
+                    pageCount = Convert.ToInt32(reader.GetValue(7)),
+                    categories = Convert.ToString(reader.GetValue(8)),
+                    publishedDate = Convert.ToString(reader.GetValue(9)),
+                    retailPrice = Convert.ToDecimal(reader.GetValue(10))
+
+
+                });
+            
+                  }
+
+            }
+            return list;
+
+        }
+
+        /*SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
+
+        DataTable dt = new DataTable();
+        adp.Fill(dt); //fill the datatable ,no need to use open and close connection by using adapater
+
+        foreach (DataRow dr in dt.Rows)
+        {
+            list.Add(new GetAllBooksInfo
+            {
+                id = Convert.ToInt32(dr["id"]),
+                title = Convert.ToString(dr["title"]),
+                auth_name = Convert.ToString(dr["auth_name"]),
+                publisher_name = Convert.ToString(dr["publisher_name"]),
+                description = Convert.ToString(dr["description"]),
+                language = Convert.ToString(dr["language"]),
+                maturityRating = Convert.ToString(dr["maturityRating"]),
+                pageCount = Convert.ToInt32(dr["pageCount"]),
+                categories = Convert.ToString(dr["categories"]),
+                publishedDate = Convert.ToString(dr["publishedDate"]),
+                retailPrice = Convert.ToDecimal(dr["retailPrice"])
+
+
+            });
+        }
+        return list;*/
+
+
 
 
     }

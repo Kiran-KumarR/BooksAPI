@@ -11,5 +11,9 @@ namespace BooksAPI.Interface
         List<AuthorModel> Put(int id, string name);
         List<AuthorModel> Delete(int id);
 
+        List<GetAllBooksInfo> GetAllBooksInfo();
+
+        List<GetAllBooksInfo> GetAllBooksInfo(int id);
+
     }
 }
