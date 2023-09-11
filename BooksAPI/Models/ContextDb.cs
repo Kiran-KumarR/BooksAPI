@@ -373,7 +373,7 @@ namespace BooksAPI.Models
                                 language=item.volumeInfo.language,
                                 maturityRating=item.volumeInfo.maturityRating,
                                 pageCount=item.volumeInfo.pageCount,
-                                categories=item.volumeInfo.categories,
+                               // categories = item.volumeInfo.categories,
                                 publishedDate = item.volumeInfo.publishedDate,
                                 retailPrice = item.volumeInfo.retailPrice,
 
@@ -418,7 +418,7 @@ namespace BooksAPI.Models
 
                     int bookId = GetUniqueBookId(sqlConnection);
 
-                    string insertBookSql = "INSERT INTO Books (book_id, title, author_id, publisher_id, description) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000))";
+                    string insertBookSql = "INSERT INTO Books (id, title, author_id, publisher_id, description) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000))";
                     SqlCommand insertBookCommand = new SqlCommand(insertBookSql, sqlConnection);
                     insertBookCommand.Parameters.AddWithValue("@BookId", bookId);
                     insertBookCommand.Parameters.AddWithValue("@Title", bookInfo.title);
@@ -433,7 +433,7 @@ namespace BooksAPI.Models
 
        public int GetOrCreateAuthorId(SqlConnection connection, string author_name)
         {
-            string selectAuthorSql = "SELECT auth_id FROM Authors WHERE author_name = @AuthorName";
+            string selectAuthorSql = "SELECT auth_id FROM Author WHERE author_name = @AuthorName";
             SqlCommand authorCommand = new SqlCommand(selectAuthorSql, connection);
             authorCommand.Parameters.AddWithValue("@AuthorName", author_name);
 
@@ -470,7 +470,7 @@ namespace BooksAPI.Models
             else
             {
 
-                string insertPublisherSql = "INSERT INTO Publishers (publisher_name, published_date) VALUES (@PublisherName, @PublishedDate); SELECT SCOPE_IDENTITY();";
+                string insertPublisherSql = "INSERT INTO Publisher (publisher_name) VALUES (@PublisherName); SELECT SCOPE_IDENTITY();";
                 SqlCommand insertPublisherCommand = new SqlCommand(insertPublisherSql, connection);
                 insertPublisherCommand.Parameters.AddWithValue("@PublisherName", publisher_name);
 

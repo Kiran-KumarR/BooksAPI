@@ -63,7 +63,7 @@
 
         public int  pageCount { get; set; }
 
-        public string categories { get; set; }
+        //public string categories { get; set; }
 
 
     }
