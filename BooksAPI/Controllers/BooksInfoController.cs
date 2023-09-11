@@ -71,8 +71,9 @@ namespace BooksAPI.Controllers
 
         // PUT api/<BooksInfoController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public List<BookInfoModel> PutintoBooks(int id, string title)
         {
+            return _config.PutintoBooks(id, title).ToList();
         }
 
         // DELETE api/<BooksInfoController>/5
