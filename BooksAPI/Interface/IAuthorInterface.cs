@@ -1,5 +1,6 @@
 ﻿using BooksAPI.Models;
 using BooksAPI.Controllers;
+using System.Data.SqlClient;
 
 namespace BooksAPI.Interface
 {
@@ -14,6 +15,19 @@ namespace BooksAPI.Interface
         List<GetAllBooksInfo> GetAllBooksInfo();
 
         List<GetAllBooksInfo> GetAllBooksInfo(int id);
+
+
+        List<BooksModel> RetrieveBooksFromDatabase();
+
+        Task<List<BookInfoModel>> FetchBooksFromApiAsync();
+
+        Task StoreBooksInDatabase(List<BookInfoModel> bookInfos);
+
+        int GetOrCreateAuthorId(SqlConnection connection, string author_name);
+
+        int GetOrCreatePublisherId(SqlConnection connection, string publisher_name);
+
+        int GetUniqueBookId(SqlConnection connection);
 
     }
 }

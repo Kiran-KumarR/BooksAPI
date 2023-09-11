@@ -29,5 +29,3 @@ CREATE TABLE BookInfo (
     publishedDate VARCHAR(50),
     retailPrice DECIMAL(6, 3)
 );
-
-

@@ -4,6 +4,8 @@ using System.Data;
 using Microsoft.Extensions.Configuration;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using BooksAPI.Interface;
+using System.Configuration;
+using Newtonsoft.Json;
 
 namespace BooksAPI.Models
 {
@@ -11,7 +13,7 @@ namespace BooksAPI.Models
     {
        
 
-         private string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
+        public string dbconn = "Data Source = (localdb)\\MSSQLLocalDB;Initial Catalog = BooksAPI_Db; Integrated Security = True";
          SqlConnection sqlConnection;
 
          // public SqlConnection sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["dbconn"].ConnectionString);
@@ -21,7 +23,12 @@ namespace BooksAPI.Models
          }
         //string connectionString = _configuration.GetConnectionString("DefaultConnection");
         //SqlConnection sqlConnection = new SqlConnection(connectionString);
+       // private readonly IConfiguration _configuration;
 
+        /*public ContextDb(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }*/
         /// <summary>
         /// GET
         /// METHOD
@@ -31,6 +38,7 @@ namespace BooksAPI.Models
         public List<AuthorModel> Get()
         {
             List<AuthorModel> list= new List<AuthorModel>();
+            //string sqlConnection = _configuration.GetConnectionString("DefaultConnection");
             SqlCommand sqlCommand = new SqlCommand("select * from Author",sqlConnection);
             SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
 
@@ -270,6 +278,220 @@ namespace BooksAPI.Models
             });
         }
         return list;*/
+
+
+
+        public List<BooksModel> RetrieveBooksFromDatabase()
+        {
+            List<BooksModel> books = new List<BooksModel>();
+
+            try
+            {
+                // string connectionString = GetConnectionString("sqlConnection");
+
+
+                //SqlCommand sqlCommand = new SqlCommand("GetAllBooksInfoById", sqlConnection);
+                sqlConnection.Open();
+
+
+              string selectSql = " SELECT B.id , B.title,A.auth_id ,   A.author_name ,  P.pub_id  ,\r\n    P.publisher_name ,\r\n    B.description  ,\r\n    BI.language ,\r\n    BI.maturityRating ,\r\n    BI.pageCount,\r\n    BI.categories ,\r\n    BI.publishedDate,\r\n    BI.retailPrice \r\nFROM\r\n    Books B\r\nINNER JOIN\r\n    Author A ON B.author_id = A.auth_id\r\nINNER JOIN\r\n    Publisher P ON B.publisher_id = P.pub_id\r\nINNER JOIN\r\n    BookInfo BI ON B.id = BI.id;\r\n";
+                 SqlCommand command = new SqlCommand(selectSql, sqlConnection);
+
+                    SqlDataReader reader = command.ExecuteReader();
+
+
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            var book = new BooksModel
+                            {
+                                id=reader.GetInt32(0),
+                                title = reader.GetString(1),
+                                auth_id=reader.GetInt32(2),
+                                author_name = reader.GetString(3),
+                                pub_id = reader.GetInt32(4),
+                                publisher_name = reader.GetString(5),
+                                description = reader.GetString(6),
+                                language = reader.GetString(7),
+                                maturityRating = reader.GetString(8),
+                                pageCount = reader.GetInt32(9),
+                                categories=reader.GetString(10),
+                                publishedDate = reader.GetString(11),
+                                retailPrice=reader.GetDecimal(12)
+                                
+
+                            };
+
+                            books.Add(book);
+                        }
+                    }
+
+
+
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+
+            return books;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public  async Task<List<BookInfoModel>> FetchBooksFromApiAsync()
+        {
+            var httpClient = new HttpClient();
+            var apiUrl = "https://www.googleapis.com/books/v1/volumes?q=kaplan%20test%20prep";
+
+            try
+            {
+                var response = await httpClient.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var responseObject = JsonConvert.DeserializeObject<GoogleBooksApiResponse>(content);
+
+                    if (responseObject.items != null)
+                    {
+                        var bookInfos = new List<BookInfoModel>();
+
+                        foreach (var item in responseObject.items)
+                        {
+                            bookInfos.Add(new BookInfoModel
+                            {
+                                //Id = item.id,
+                                title = item.volumeInfo.title,
+                                author_name = item.volumeInfo.authors != null ? string.Join(", ", item.volumeInfo.authors) : "No author",
+                                publisher_name = item.volumeInfo.publisher,
+                                description =item.volumeInfo.description,
+                                language=item.volumeInfo.language,
+                                maturityRating=item.volumeInfo.maturityRating,
+                                pageCount=item.volumeInfo.pageCount,
+                                categories=item.volumeInfo.categories,
+                                publishedDate = item.volumeInfo.publishedDate,
+                                retailPrice = item.volumeInfo.retailPrice,
+
+                            });
+                        }
+
+                        return bookInfos;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"API request failed with status code: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API request failed with exception: {ex.Message}");
+            }
+
+            return new List<BookInfoModel>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookInfos"></param>
+        /// <returns></returns>
+
+        public async Task StoreBooksInDatabase(List<BookInfoModel> bookInfos)
+        {
+            //string connectionString = 
+
+           SqlConnection sqlConnection = new SqlConnection(dbconn);
+            sqlConnection.Open();
+           
+            foreach (var bookInfo in bookInfos)
+                {
+
+                    int auth_id= GetOrCreateAuthorId(sqlConnection, bookInfo.author_name);
+
+                    int pub_id = GetOrCreatePublisherId(sqlConnection, bookInfo.publisher_name);
+
+                    int bookId = GetUniqueBookId(sqlConnection);
+
+                    string insertBookSql = "INSERT INTO Books (book_id, title, author_id, publisher_id, description) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000))";
+                    SqlCommand insertBookCommand = new SqlCommand(insertBookSql, sqlConnection);
+                    insertBookCommand.Parameters.AddWithValue("@BookId", bookId);
+                    insertBookCommand.Parameters.AddWithValue("@Title", bookInfo.title);
+                    insertBookCommand.Parameters.AddWithValue("@AuthorId", auth_id);
+                    insertBookCommand.Parameters.AddWithValue("@PublisherId", pub_id);
+                    insertBookCommand.Parameters.AddWithValue("@Description", bookInfo.description); // Use Description
+
+                    insertBookCommand.ExecuteNonQuery();
+                }
+            
+        }
+
+       public int GetOrCreateAuthorId(SqlConnection connection, string author_name)
+        {
+            string selectAuthorSql = "SELECT auth_id FROM Authors WHERE author_name = @AuthorName";
+            SqlCommand authorCommand = new SqlCommand(selectAuthorSql, connection);
+            authorCommand.Parameters.AddWithValue("@AuthorName", author_name);
+
+            object authorIdResult = authorCommand.ExecuteScalar();
+
+            if (authorIdResult != null)
+            {
+                return (int)authorIdResult;
+            }
+            else
+            {
+
+                string insertAuthorSql = "INSERT INTO Author (author_name) VALUES (@AuthorName); SELECT SCOPE_IDENTITY();";
+                SqlCommand insertAuthorCommand = new SqlCommand(insertAuthorSql, connection);
+                insertAuthorCommand.Parameters.AddWithValue("@AuthorName", author_name);
+
+                return Convert.ToInt32(insertAuthorCommand.ExecuteScalar());
+            }
+        }
+
+        public int GetOrCreatePublisherId(SqlConnection connection, string publisher_name)
+        {
+            string selectPublisherSql = "SELECT pub_id FROM Publisher WHERE publisher_name = @PublisherName";
+            SqlCommand publisherCommand = new SqlCommand(selectPublisherSql, connection);
+            publisherCommand.Parameters.AddWithValue("@PublisherName", publisher_name);
+          
+
+            object publisherIdResult = publisherCommand.ExecuteScalar();
+
+            if (publisherIdResult != null)
+            {
+                return (int)publisherIdResult;
+            }
+            else
+            {
+
+                string insertPublisherSql = "INSERT INTO Publishers (publisher_name, published_date) VALUES (@PublisherName, @PublishedDate); SELECT SCOPE_IDENTITY();";
+                SqlCommand insertPublisherCommand = new SqlCommand(insertPublisherSql, connection);
+                insertPublisherCommand.Parameters.AddWithValue("@PublisherName", publisher_name);
+
+                return Convert.ToInt32(insertPublisherCommand.ExecuteScalar());
+            }
+        }
+        public int GetUniqueBookId(SqlConnection connection)
+        {
+
+            string selectMaxBookIdSql = "SELECT MAX(id) FROM Books";
+            SqlCommand selectMaxBookIdCommand = new SqlCommand(selectMaxBookIdSql, connection);
+            var maxId = selectMaxBookIdCommand.ExecuteScalar();
+            if (maxId == DBNull.Value)
+            {
+                return 1;
+            }
+            else
+            {
+                return (int)maxId + 1;
+            }
+        }
 
 
 
