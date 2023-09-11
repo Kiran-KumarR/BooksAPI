@@ -78,9 +78,9 @@ namespace BooksAPI.Controllers
 
         // DELETE api/<BooksInfoController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public List<BookInfoModel> DeleteBook(int id)
         {
-
+            return _config.DeleteBook(id).ToList();
 
         }
 

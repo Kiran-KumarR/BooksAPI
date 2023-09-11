@@ -35,5 +35,7 @@ namespace BooksAPI.Interface
         List<BookInfoModel> PostBooks();
 
         List<BookInfoModel> PutintoBooks(int id, string title);
+
+        List<BookInfoModel> DeleteBook(int id);
     }
 }
