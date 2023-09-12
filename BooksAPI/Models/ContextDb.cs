@@ -54,6 +54,7 @@ namespace BooksAPI.Models
                 });
             }
             return list;
+            sqlConnection.Close();
 
         }
         /// <summary>
@@ -269,7 +270,7 @@ namespace BooksAPI.Models
                 sqlConnection.Open();
 
 
-              string selectSql = " SELECT B.id , B.title,A.auth_id ,   A.author_name ,  P.pub_id  ,  P.publisher_name ,   B.description  ,  B.language , B.maturityRating ,  B.pageCount,  BI.categories ,   B.publishedDate, B.retailPrice FROM    Books B INNER JOIN Author A ON B.author_id = A.auth_id INNER JOIN Publisher P ON B.publisher_id = P.pub_id ";
+              string selectSql = " SELECT B.id , B.title,A.auth_id ,   A.author_name ,  P.pub_id  ,  P.publisher_name ,   B.description  ,  B.language , B.maturityRating ,  B.pageCount,   B.publishedDate, B.retailPrice FROM    Books B INNER JOIN Author A ON B.author_id = A.auth_id INNER JOIN Publisher P ON B.publisher_id = P.pub_id ";
                  SqlCommand command = new SqlCommand(selectSql, sqlConnection);
 
                     SqlDataReader reader = command.ExecuteReader();
@@ -303,7 +304,7 @@ namespace BooksAPI.Models
                     }
 
 
-
+                    //sqlConnection.Close();
                 
             }
             catch (Exception ex)
@@ -321,7 +322,9 @@ namespace BooksAPI.Models
         public  async Task<List<BookInfoModel>> FetchBooksFromApiAsync()
         {
             var httpClient = new HttpClient();
-            var apiUrl = "https://www.googleapis.com/books/v1/volumes?q=kaplan%20test%20prep";
+            //var apiUrl = "https://www.googleapis.com/books/v1/volumes?q=kaplan%20test%20prep";
+            var apiUrl = "https://www.bing.com/books/v1/volumes?q=kaplan%20test%20prep";
+
 
             try
             {
@@ -361,6 +364,31 @@ namespace BooksAPI.Models
                 else
                 {
                     Console.WriteLine($"API request failed with status code: {response.StatusCode}");
+                    var jsonFile = @"C:\Users\KKumarR\Desktop\BooksAPI\BooksAPI\Database\kaplan_book.json";
+                    using (StreamReader reader = new StreamReader(jsonFile))
+                    {
+                        var jsonString = reader.ReadToEnd();
+                        var bookInfos = JsonConvert.DeserializeObject<List<GoogleBooksApiResponse>>(jsonString);
+                        var bookInfo = new List<BookInfoModel>();
+                        foreach (var item in bookInfos[0].items)
+                        {
+                            bookInfo.Add(new BookInfoModel
+                            {
+                                //Id = item.id,
+                                title = item.volumeInfo.title,
+                                author_name = item.volumeInfo.authors != null ? string.Join(", ", item.volumeInfo.authors) : "No author",
+                                publisher_name = item.volumeInfo.publisher,
+                                description = item.volumeInfo.description,
+                                language = item.volumeInfo.language,
+                                maturityRating = item.volumeInfo.maturityRating,
+                                pageCount = item.volumeInfo.pageCount,
+                                // categories = item.volumeInfo.categories,
+                                publishedDate = item.volumeInfo.publishedDate,
+                                retailPrice = item.volumeInfo.retailPrice,
+                            });
+                        }
+                        return bookInfo;
+                    }
                 }
             }
             catch (Exception ex)
@@ -379,18 +407,16 @@ namespace BooksAPI.Models
 
         public async Task StoreBooksInDatabase(List<BookInfoModel> bookInfos)
         {
-            //string connectionString = 
+            SqlConnection sqlConnection = new SqlConnection(dbconn);
 
-           SqlConnection sqlConnection = new SqlConnection(dbconn);
-            sqlConnection.Open();
-           
-            foreach (var bookInfo in bookInfos)
+            try
+            {
+                sqlConnection.Open();
+
+                foreach (var bookInfo in bookInfos)
                 {
-
-                    int auth_id= GetOrCreateAuthorId(sqlConnection, bookInfo.author_name);
-
+                    int auth_id = GetOrCreateAuthorId(sqlConnection, bookInfo.author_name);
                     int pub_id = GetOrCreatePublisherId(sqlConnection, bookInfo.publisher_name);
-
                     int bookId = GetUniqueBookId(sqlConnection);
 
                     string insertBookSql = "INSERT INTO Books (id, title, author_id, publisher_id, description,language,maturityRating,pageCount,publishedDate,retailPrice) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000),@language,@maturityRating,@pageCount,@publishedDate,@retailPrice)";
@@ -406,10 +432,23 @@ namespace BooksAPI.Models
                     insertBookCommand.Parameters.AddWithValue("@publishedDate", bookInfo.publishedDate);
                     insertBookCommand.Parameters.AddWithValue("@retailPrice", bookInfo.retailPrice);
 
-                insertBookCommand.ExecuteNonQuery();
+                    insertBookCommand.ExecuteNonQuery();
                 }
-            
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in StoreBooksInDatabase: {ex.Message}");
+                throw; // Re-throw the exception to handle it at a higher level.
+            }
+            finally
+            {
+                if (sqlConnection.State == ConnectionState.Open)
+                {
+                    sqlConnection.Close(); // Ensure the connection is closed, even in case of exceptions.
+                }
+            }
         }
+
 
 
         /// <summary>
@@ -418,7 +457,7 @@ namespace BooksAPI.Models
         /// <param name="connection"></param>
         /// <param name="author_name"></param>
         /// <returns></returns>
-       public int GetOrCreateAuthorId(SqlConnection connection, string author_name)
+        public int GetOrCreateAuthorId(SqlConnection connection, string author_name)
         {
             string selectAuthorSql = "SELECT auth_id FROM Author WHERE author_name = @AuthorName";
             SqlCommand authorCommand = new SqlCommand(selectAuthorSql, connection);
@@ -477,19 +516,22 @@ namespace BooksAPI.Models
         /// <returns></returns>
         public int GetUniqueBookId(SqlConnection connection)
         {
-            sqlConnection.Open();
-            string selectMaxBookIdSql = "SELECT MAX(id) FROM Books";
-            SqlCommand selectMaxBookIdCommand = new SqlCommand(selectMaxBookIdSql, connection);
-            var maxId = selectMaxBookIdCommand.ExecuteScalar();
-            if (maxId == DBNull.Value)
-            {
-                return 1;
-            }
-            else
-            {
-                return (int)maxId + 1;
-            }
+           
+               
+                string selectMaxBookIdSql = "SELECT MAX(id) FROM Books";
+                SqlCommand selectMaxBookIdCommand = new SqlCommand(selectMaxBookIdSql, connection);
+                var maxId = selectMaxBookIdCommand.ExecuteScalar();
+                if (maxId == DBNull.Value)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return (int)maxId + 1;
+                }
+        
         }
+
         /// <summary>
         /// 
         /// </summary>
