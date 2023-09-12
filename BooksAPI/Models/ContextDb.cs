@@ -253,32 +253,7 @@ namespace BooksAPI.Models
 
         }
 
-        /*SqlDataAdapter adp = new SqlDataAdapter(sqlCommand);
-
-        DataTable dt = new DataTable();
-        adp.Fill(dt); //fill the datatable ,no need to use open and close connection by using adapater
-
-        foreach (DataRow dr in dt.Rows)
-        {
-            list.Add(new GetAllBooksInfo
-            {
-                id = Convert.ToInt32(dr["id"]),
-                title = Convert.ToString(dr["title"]),
-                auth_name = Convert.ToString(dr["auth_name"]),
-                publisher_name = Convert.ToString(dr["publisher_name"]),
-                description = Convert.ToString(dr["description"]),
-                language = Convert.ToString(dr["language"]),
-                maturityRating = Convert.ToString(dr["maturityRating"]),
-                pageCount = Convert.ToInt32(dr["pageCount"]),
-                categories = Convert.ToString(dr["categories"]),
-                publishedDate = Convert.ToString(dr["publishedDate"]),
-                retailPrice = Convert.ToDecimal(dr["retailPrice"])
-
-
-            });
-        }
-        return list;*/
-
+       
 
 
         public List<BooksModel> RetrieveBooksFromDatabase()
