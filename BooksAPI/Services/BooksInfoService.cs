@@ -23,7 +23,7 @@ namespace BooksAPI.Services
         {
             var httpClient = new HttpClient();
             //var apiUrl = "https://www.googleapis.com/books/v1/volumes?q=kaplan%20test%20prep";
-            var apiUrl = "https://www.bing.com/books/v1/volumes?q=kaplan%20test%20prep";
+           var apiUrl = "https://www.bing.com/books/v1/volumes?q=kaplan%20test%20prep";
 
 
             try
@@ -129,7 +129,7 @@ namespace BooksAPI.Services
                 {
                     int auth_id = GetOrCreateAuthorId(sqlConnection, bookInfo.author_name);
                     int pub_id = GetOrCreatePublisherId(sqlConnection, bookInfo.publisher_name);
-                    int bookId = GetUniqueBookId(sqlConnection);
+                    int bookId = GetOrCreateBookId(sqlConnection);
 
                     string insertBookSql = "INSERT INTO Books (id, title, author_id, publisher_id, description,language,maturityRating,pageCount,publishedDate,retailPrice) VALUES (@BookId, @Title, @AuthorId, @PublisherId, LEFT(@Description, 1000),@language,@maturityRating,@pageCount,@publishedDate,@retailPrice)";
                     SqlCommand insertBookCommand = new SqlCommand(insertBookSql, sqlConnection);
@@ -219,12 +219,13 @@ namespace BooksAPI.Services
             throw new NotImplementedException();
         }*/
 
-        public int GetUniqueBookId(SqlConnection connection)
+        public int GetOrCreateBookId(SqlConnection connection)
         {
 
 
             string selectMaxBookIdSql = "SELECT MAX(id) FROM Books";
             SqlCommand selectMaxBookIdCommand = new SqlCommand(selectMaxBookIdSql, connection);
+            connection.Open();
             var maxId = selectMaxBookIdCommand.ExecuteScalar();
             if (maxId == DBNull.Value)
             {
@@ -237,6 +238,21 @@ namespace BooksAPI.Services
 
         }
 
+        public int GetBookId(SqlConnection connection)
+        {
+            string selectMaxBookIdSql = "SELECT MAX(id) FROM Books";
+            SqlCommand selectMaxBookIdCommand = new SqlCommand(selectMaxBookIdSql, connection);
+            connection.Open();
+            var maxId = selectMaxBookIdCommand.ExecuteScalar();
+            if (maxId == DBNull.Value)
+            {
+                return 1;
+            }
+            else
+            {
+                return (int)maxId;
+            }
+        }
         public BookInfoModel GetBookById(int id)
         {
             return _databaseService.RetrieveBookByIdFromDatabase(id);
@@ -247,6 +263,110 @@ namespace BooksAPI.Services
             return _databaseService.RetrieveBookByIdFromDatabase(id);
         }
 
+        public List<BookInfoModel> PostBooks(BookInfoModel bookInfo)
+        {
+            string connectionString = _configuration.GetConnectionString("dbconn");
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
 
+            List<BookInfoModel> list = new List<BookInfoModel>();
+
+          
+            int bookId = GetOrCreateBookId(sqlConnection);
+            int authId = GetOrCreateAuthorId(sqlConnection, bookInfo.author_name);
+            int pubId = GetOrCreatePublisherId(sqlConnection, bookInfo.publisher_name);
+
+            SqlCommand insertBookCommand = new SqlCommand("INSERT INTO Books(id, title, author_id, publisher_id, description, language, maturityRating, pageCount, publishedDate, retailPrice) " +
+                "VALUES (@BookId, @Title, @Author_ID, @Publisher_ID, @Description, @Language, @MaturityRating, @PageCount, @PublishedDate, @RetailPrice);", sqlConnection);
+
+            insertBookCommand.Parameters.AddWithValue("@BookId", bookId);
+            insertBookCommand.Parameters.AddWithValue("@Title", bookInfo.title);
+            insertBookCommand.Parameters.AddWithValue("@Author_ID", authId);
+            insertBookCommand.Parameters.AddWithValue("@Publisher_ID", pubId);
+            insertBookCommand.Parameters.AddWithValue("@Description", bookInfo.description);
+            insertBookCommand.Parameters.AddWithValue("@Language", bookInfo.language);
+            insertBookCommand.Parameters.AddWithValue("@MaturityRating", bookInfo.maturityRating);
+            insertBookCommand.Parameters.AddWithValue("@PageCount", bookInfo.pageCount);
+            insertBookCommand.Parameters.AddWithValue("@PublishedDate", bookInfo.publishedDate);
+            insertBookCommand.Parameters.AddWithValue("@RetailPrice", bookInfo.retailPrice);
+
+            
+            insertBookCommand.ExecuteNonQuery();
+            sqlConnection.Close();
+
+            // Since you just inserted a book, you can directly add it to the list
+            list.Add(new BookInfoModel
+            {
+                id = bookId,
+                title = bookInfo.title,
+                auth_id = authId,
+                pub_id = pubId,
+                description = bookInfo.description,
+                language = bookInfo.language,
+                maturityRating = bookInfo.maturityRating,
+                publishedDate = bookInfo.publishedDate,
+                retailPrice = bookInfo.retailPrice
+            });
+
+            return list;
+        }
+
+
+        public List<BookInfoModel> PutintoBooks(BookInfoModel bookInfo)
+        {
+            string connectionString = _configuration.GetConnectionString("dbconn");
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+
+            List<BookInfoModel> list = new List<BookInfoModel>();
+
+            int bookId = GetBookId(sqlConnection);
+            int authId = GetOrCreateAuthorId(sqlConnection, bookInfo.author_name);
+            int pubId = GetOrCreatePublisherId(sqlConnection, bookInfo.publisher_name);
+
+            SqlCommand sqlCommand = new SqlCommand("UPDATE Books SET " +
+        "title = ISNULL(@Title, title), " +
+        "author_id = ISNULL(@Author_ID, author_id), " +
+        "publisher_id = ISNULL(@Publisher_ID, publisher_id), " +
+        "description = ISNULL(@Description, description), " +
+        "language = ISNULL(@Language, language), " +
+        "maturityRating = ISNULL(@MaturityRating, maturityRating), " +
+        "pageCount = ISNULL(@PageCount, pageCount), " +
+        "publishedDate = ISNULL(@PublishedDate, publishedDate), " +
+        "retailPrice = ISNULL(@RetailPrice, retailPrice) " +
+        "WHERE id = @Id;", sqlConnection);  //SELECT * FROM Author WHERE auth_id = @id
+
+            sqlCommand.Parameters.AddWithValue("@Id", bookId);
+            sqlCommand.Parameters.AddWithValue("@Title", bookInfo.title);
+            sqlCommand.Parameters.AddWithValue("@Author_ID", authId);
+            sqlCommand.Parameters.AddWithValue("@Publisher_ID", pubId);
+            sqlCommand.Parameters.AddWithValue("@Description", bookInfo.description);
+
+            sqlCommand.Parameters.AddWithValue("@Language", bookInfo.language);
+            sqlCommand.Parameters.AddWithValue("@MaturityRating", bookInfo.maturityRating);
+
+
+            sqlCommand.Parameters.AddWithValue("@PageCount", bookInfo.pageCount);
+            sqlCommand.Parameters.AddWithValue("@PublishedDate", bookInfo.publishedDate);
+            sqlCommand.Parameters.AddWithValue("@RetailPrice", bookInfo.retailPrice);
+
+
+            sqlCommand.ExecuteNonQuery();
+            sqlConnection.Close();
+
+            list.Add(new BookInfoModel
+            {
+                id = bookId,
+                title = bookInfo.title,
+                auth_id = authId,
+                pub_id = pubId,
+                description = bookInfo.description,
+                language = bookInfo.language,
+                maturityRating = bookInfo.maturityRating,
+                publishedDate = bookInfo.publishedDate,
+                retailPrice = bookInfo.retailPrice
+            });
+
+            return list;
+
+        }
     }
 }

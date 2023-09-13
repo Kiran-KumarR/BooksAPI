@@ -26,14 +26,6 @@ namespace BooksAPI.Controllers
 
 
 
-
-       /* private readonly IAuthorInterface _config;
-        public BooksInfoController(IAuthorInterface configuration)
-        {
-            _config = configuration;
-        }*/
-
-
         // GET: api/<BooksInfoController>
         [HttpGet]
         public async Task<IActionResult> GetAllBooks([FromQuery] bool seed = true)
@@ -109,20 +101,21 @@ namespace BooksAPI.Controllers
         }
 
         // POST api/<BooksInfoController>
-       /* [HttpPost]
-        public List<BookInfoModel> PostBooks()
+      
+        [HttpPost]
+        public List<BookInfoModel> PostBooks(BookInfoModel bookInfo)
         {
            
 
-            return _config.PostBooks().ToList();
+            return _bookService.PostBooks( bookInfo).ToList();
         }
 
         // PUT api/<BooksInfoController>/5
         [HttpPut("{id}")]
-        public List<BookInfoModel> PutintoBooks(int id, string title)
+        public List<BookInfoModel> PutintoBooks(BookInfoModel bookInfo)
         {
-            return _config.PutintoBooks(id, title).ToList();
-        }*/
+            return _bookService.PutintoBooks(bookInfo).ToList();
+        }
 
 
 
