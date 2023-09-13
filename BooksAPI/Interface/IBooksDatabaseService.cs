@@ -9,6 +9,8 @@ namespace BooksAPI.Interface
 
         bool DeleteBookFromDatabase(int id);
 
+        List<BookInfoModel> RetrieveBooksFromDatabase();
+
 
 
 

@@ -5,16 +5,17 @@ namespace BooksAPI.Interface
 {
     public interface IBooksInfoService
     {
-
         Task<List<BookInfoModel>> FetchBooksFromApiAsync();
-        Task StoreBooksInDatabase(List<BookInfoModel> bookInfos);
-
-        Task<int> GetOrCreateAuthorId(SqlConnection connection, string author);
-        Task<int> GetOrCreatePublisherId(SqlConnection connection, string publisherName, string publishedDate);
-        int GetUniqueBookId(SqlConnection connection);
-
         Task<List<BookInfoModel>> RetrieveBooksFromJson(string jsonFilePath);
 
+        Task StoreBooksInDatabase(List<BookInfoModel> bookInfos);
+        int GetOrCreatePublisherId(SqlConnection connection, string publisher_name);
+        int GetUniqueBookId(SqlConnection connection);
 
+       // Task<List<BookInfoModel>> RetrieveBooksFromJson(string jsonFilePath);
+
+        BookInfoModel GetBookById(int id);
+
+        BookInfoModel DeleteBookById(int id);
     }
 }
