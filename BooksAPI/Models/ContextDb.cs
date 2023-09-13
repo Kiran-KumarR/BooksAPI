@@ -365,14 +365,43 @@ namespace BooksAPI.Models
                 {
                     Console.WriteLine($"API request failed with status code: {response.StatusCode}");
                     var jsonFile = @"C:\Users\KKumarR\Desktop\BooksAPI\BooksAPI\Database\kaplan_book.json";
-                    using (StreamReader reader = new StreamReader(jsonFile))
+                    await RetrieveBooksFromJson( jsonFile );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API request failed with exception: {ex.Message}");
+            }
+
+            return new List<BookInfoModel>();
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<BookInfoModel>> FetchBooksFromAPI()
+        {
+            var httpClient = new HttpClient();
+            //var apiUrl = "https://www.googleapis.com/books/v1/volumes?q=kaplan%20test%20prep";
+            var apiUrl = "https://www.bing.com/books/v1/volumes?q=kaplan%20test%20prep";
+
+            try
+            {
+                var response = await httpClient.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var responseObject = JsonConvert.DeserializeObject<GoogleBooksApiResponse>(content);
+
+                    if (responseObject.items != null)
                     {
-                        var jsonString = reader.ReadToEnd();
-                        var bookInfos = JsonConvert.DeserializeObject<List<GoogleBooksApiResponse>>(jsonString);
-                        var bookInfo = new List<BookInfoModel>();
-                        foreach (var item in bookInfos[0].items)
+                        var bookInfos = new List<BookInfoModel>();
+
+                        foreach (var item in responseObject.items)
                         {
-                            bookInfo.Add(new BookInfoModel
+                            bookInfos.Add(new BookInfoModel
                             {
                                 //Id = item.id,
                                 title = item.volumeInfo.title,
@@ -387,13 +416,62 @@ namespace BooksAPI.Models
                                 retailPrice = item.volumeInfo.retailPrice,
                             });
                         }
-                        return bookInfo;
+
+                        return bookInfos;
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"API request failed with status code: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"API request failed with exception: {ex.Message}");
+            }
+
+            return new List<BookInfoModel>();
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonFilePath"></param>
+        /// <returns></returns>
+        public async Task<List<BookInfoModel>> RetrieveBooksFromJson(string jsonFilePath)
+        {
+            try
+            {
+                using (StreamReader reader = new StreamReader(jsonFilePath))
+                {
+                    var jsonString = reader.ReadToEnd();
+                    var bookInfos = JsonConvert.DeserializeObject<List<GoogleBooksApiResponse>>(jsonString);
+                    var bookInfo = new List<BookInfoModel>();
+
+                    foreach (var item in bookInfos[0].items)
+                    {
+                        bookInfo.Add(new BookInfoModel
+                        {
+                            //Id = item.id,
+                            title = item.volumeInfo.title,
+                            author_name = item.volumeInfo.authors != null ? string.Join(", ", item.volumeInfo.authors) : "No author",
+                            publisher_name = item.volumeInfo.publisher,
+                            description = item.volumeInfo.description,
+                            language = item.volumeInfo.language,
+                            maturityRating = item.volumeInfo.maturityRating,
+                            pageCount = item.volumeInfo.pageCount,
+                            // categories = item.volumeInfo.categories,
+                            publishedDate = item.volumeInfo.publishedDate,
+                            retailPrice = item.volumeInfo.retailPrice,
+                        });
+                    }
+                    return bookInfo;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in RetrieveBooksFromJson: {ex.Message}");
             }
 
             return new List<BookInfoModel>();

@@ -21,36 +21,57 @@ namespace BooksAPI.Controllers
 
         // GET: api/<BooksInfoController>
         [HttpGet]
-        public async Task<IActionResult> GetAllBooks([FromQuery] bool seed = true)//seed=faalse
+        public async Task<IActionResult> GetAllBooks([FromQuery] bool seed = true)
         {
             if (seed)
             {
                 var booksFromDatabase = _config.RetrieveBooksFromDatabase();
-
-                if (booksFromDatabase.Count > 0)
+                if (booksFromDatabase.Count == 0)
                 {
-                    return Ok(booksFromDatabase);
+                    // Database is empty, try fetching from API
+                    var booksFromApi = await _config.FetchBooksFromApiAsync();
+                    if (booksFromApi != null && booksFromApi.Count > 0)
+                    {
+                        await _config.StoreBooksInDatabase(booksFromApi);
+                        return Ok(booksFromApi);
+                    }
+                    else
+                    {
+                        // API failed, try fetching from local JSON file
+                        var jsonFile = @"C:\Users\KKumarR\Desktop\BooksAPI\BooksAPI\Database\kaplan_book.json";
+                        var booksFromJsonTask = _config.RetrieveBooksFromJson(jsonFile); //obtain the actual list first then await it and then checking its count
+                        var booksFromJson = await booksFromJsonTask;
+
+                        if (booksFromJson != null && booksFromJson.Count > 0)
+                        {
+                            await _config.StoreBooksInDatabase(booksFromJson);
+                            return Ok(booksFromJson);
+                        }
+
+                        else
+                        {
+                            return NotFound("No books found from API or local JSON file.");
+                        }
+                    }
                 }
                 else
                 {
-                    return NotFound("No books found in the database.");
+                    // Database is not empty, return records from the database
+                    return Ok(booksFromDatabase);
                 }
             }
             else
             {
-                var booksFromApi = await _config.FetchBooksFromApiAsync();
-                //     RetrieveBooksFromDatabase(booksFromApi);
-
-                if (booksFromApi.Count > 0)
+                // Seed is false, check if the database is empty
+                var booksFromDatabase = _config.RetrieveBooksFromDatabase();
+                if (booksFromDatabase.Count == 0)
                 {
-                    // await StoreBooksInDatabase(booksFromApi);
-                    List<BookInfoModel> bookInfos = booksFromApi;
-                    await _config.StoreBooksInDatabase(bookInfos);
-                    return Ok(booksFromApi);
+                    return NotFound("No records found in the database.");
                 }
                 else
                 {
-                    return NotFound("No books found from the API.");
+                    // Database is not empty, return records from the database
+                    return Ok(booksFromDatabase);
                 }
             }
         }
