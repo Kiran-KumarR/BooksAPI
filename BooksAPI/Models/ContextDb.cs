@@ -380,7 +380,7 @@ namespace BooksAPI.Models
         /// 
         /// </summary>
         /// <returns></returns>
-        public async Task<List<BookInfoModel>> FetchBooksFromAPI()
+       /* public async Task<List<BookInfoModel>> FetchBooksFromAPI()
         {
             var httpClient = new HttpClient();
             //var apiUrl = "https://www.googleapis.com/books/v1/volumes?q=kaplan%20test%20prep";
@@ -390,7 +390,7 @@ namespace BooksAPI.Models
             {
                 var response = await httpClient.GetAsync(apiUrl);
 
-                if (response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)//response:200
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     var responseObject = JsonConvert.DeserializeObject<GoogleBooksApiResponse>(content);
@@ -432,7 +432,7 @@ namespace BooksAPI.Models
 
             return new List<BookInfoModel>();
         }
-
+       */
 
         /// <summary>
         /// 

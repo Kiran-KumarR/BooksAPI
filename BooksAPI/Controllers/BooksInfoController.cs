@@ -12,6 +12,22 @@ namespace BooksAPI.Controllers
     public class BooksInfoController : ControllerBase
     {
 
+
+
+        private readonly IConfiguration _configuration;
+        private readonly IBooksInfoService _bookService;
+        private readonly IBooksDatabaseService _databaseService;
+
+        /*public BooksInfoController(IConfiguration configuration, IBooksInfoService bookService, IBooksDatabaseService databaseService)
+        {
+            _configuration = configuration;
+            _bookService = bookService;
+            _databaseService = databaseService;
+        }*/
+
+
+
+
         private readonly IAuthorInterface _config;
         public BooksInfoController(IAuthorInterface configuration)
         {
