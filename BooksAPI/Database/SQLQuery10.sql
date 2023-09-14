@@ -31,5 +31,3 @@ INNER JOIN BookInfo ON Books.id = BookInfo.id;
 
 ---------
 select * from AllBooksInfo;
-
-insert into 

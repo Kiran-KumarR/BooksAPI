@@ -27,5 +27,9 @@
         public string publishedDate { get; set; }
 
         public decimal retailPrice { get; set; }
+
+        public int author_id {  get; set; }
+
+        public int publisher_id {  get; set; }
     }
 }

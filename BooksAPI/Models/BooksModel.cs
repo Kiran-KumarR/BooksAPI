@@ -1,4 +1,6 @@
-﻿namespace BooksAPI.Models
+﻿using System.Drawing.Printing;
+
+namespace BooksAPI.Models
 {
     public class BooksModel
     {
@@ -36,6 +38,36 @@
         public string kind { get; set; }
         public int totalItems { get; set; }
         public List<GoogleBooksApiItem> items { get; set; }
+
+        public int id { get; set; }
+
+        public string title { get; set; }
+
+        public string publisher_name { get; set; }
+        public string publishedDate { get; set;}
+
+        public int publisher_id { get; set; }
+
+        public string author_name { get; set;}
+
+        public int auth_id { get; set;}
+
+        public int pub_id { get; set;}
+        public decimal retailPrice { get; set; }
+
+        public string description { get; set; }
+
+        public int pageCount { get; set;}
+
+        public string categories { get; set; }
+
+        public string maturityRating { get; set;}
+
+        public int author_id {  get; set; }
+
+
+
+
     }
 
     public class GoogleBooksApiItem

@@ -37,5 +37,7 @@ namespace BooksAPI.Interface
         List<BookInfoModel> PutintoBooks(int id, string title);
 
         List<BookInfoModel> DeleteBook(int id);
+
+        Task<List<BookInfoModel>> RetrieveBooksFromJson(string jsonFilePath);
     }
 }
